@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- 数据源 -->
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <bean id="dataSource"
+          class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${jdbc.driverClassName}"></property>
+        <property name="jdbcUrl" value="${jdbc.url}"></property>
+        <property name="user" value="${jdbc.username}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+    <!-- 事务管理器 -->
+    <bean id="dataSourceTransactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+         <property name="dataSource" ref="dataSource"></property>
+    </bean>
+
+    <!-- 基于注解的事务管理 -->
+    <tx:annotation-driven transaction-manager="dataSourceTransactionManager"/>
+    <!-- 配置 SqlSessionFactoryBean
+         Mybatis的是org.mybatis.spring.SqlSessionFactoryBean
+         MybatisPlus的是com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean
+         MybatisPlus无序配置sql映射文件
+     -->
+    <bean id="sqlSessionFactoryBean" class="com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:mybatis.xml"></property>
+        <!-- 别名处理 -->
+        <property name="typeAliasesPackage" value="com.mrlu.mybatisplus.domain"></property>
+
+        <!--注入MP的全局配置策略-->
+        <property name="globalConfig" ref="globalConfig"></property>
+
+        <!--第一种分页方式-->
+        <!--   ②添加分页插件到MybatisSqlSessionFactoryBean-->
+       <!-- <property name="plugins" ref="interceptor"></property>-->
+
+        <!--第二种分页方式-->
+        <!-- spring xml 方式 -->
+        <property name="plugins">
+            <array>
+                <!--注册每一个插件-->
+
+                <!--第二种分页方式-->
+                <!--<bean class="com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor">
+                    &lt;!&ndash;<property name="sqlParser" ref="自定义解析类、可以没有"/>&ndash;&gt;
+                    &lt;!&ndash;<property name="dialectClazz" value="自定义方言类、可以没有"/>&ndash;&gt;
+
+                    &lt;!&ndash; COUNT SQL 解析.可以没有 &ndash;&gt;
+                    <property name="countSqlParser" ref="countSqlParser"/>
+                </bean>-->
+                <!--第三种分页方式-->
+                <ref bean="mybatisPlusInterceptor"></ref>
+            </array>
+        </property>
+    </bean>
+    <!--第一种分页方式-->
+    <!--    ①构建paginationInterceptor   -->
+    <!--<bean id="interceptor" class="com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor"></bean>-->
+
+    <!--第二种分页方式-->
+    <!--<bean id="countSqlParser" class="com.baomidou.mybatisplus.extension.plugins.pagination.optimize.JsqlParserCountOptimize">
+        &lt;!&ndash; 设置为 true 可以优化部分 left join 的sql &ndash;&gt;
+        <property name="optimizeJoin" value="true"/>
+    </bean>-->
+
+    <!--第三种分页方式-->
+    <bean id="mybatisPlusInterceptor" class="com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor">
+        <property name="interceptors">
+            <list>
+                <ref bean="paginationInnerInterceptor"/>
+            </list>
+        </property>
+    </bean>
+    <!--第三种分页方式-->
+    <bean id="paginationInnerInterceptor" class="com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor">
+        <!-- 对于单一数据库类型来说,都建议配置该值,避免每次分页都去抓取数据库类型 -->
+        <constructor-arg name="dbType" value="H2"/>
+    </bean>
+
+
+    <!--配置mp的全局策略，配置了这个就可以省略类上的@TableName()注解和主键上的@TableId注解-->
+    <bean id="globalConfig" class="com.baomidou.mybatisplus.core.config.GlobalConfig">
+        <!--配置数据库全局默认的映射关系-->
+        <property name="dbConfig">
+            <bean class="com.baomidou.mybatisplus.core.config.GlobalConfig$DbConfig">
+                <!--声明全局默认类名的对应的表的前缀。-->
+                <property name="tablePrefix" value="t_"></property>
+                <!--配置全局主键自增-->
+                <property name="idType" value="AUTO"></property>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="employeeServiceImpl" class="com.mrlu.mybatisplus.service.impl.EmployeeServiceImpl"></bean>
+
+    <!--
+    配置 mybatis 扫描 mapper 接口的路径
+    -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.mrlu.mybatisplus.mapper"></property>
+    </bean>
+</beans>

@@ -1,0 +1,5 @@
+# Project exclude paths
+/01-mybatisplus/target/
+/02-mybatisplus/target/
+/03-mybatisplus-generator/target/
+/04-mybatisplus-plugins/target/

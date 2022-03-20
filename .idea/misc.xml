@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/01-mybatisplus/pom.xml" />
+        <option value="$PROJECT_DIR$/02-mybatisplus/pom.xml" />
+        <option value="$PROJECT_DIR$/03-mybatisplus - generator/pom.xml" />
+        <option value="$PROJECT_DIR$/03-mybatisplus-generator/pom.xml" />
+        <option value="$PROJECT_DIR$/04-mybatisplus-plugins/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_13" default="false">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+</project>
